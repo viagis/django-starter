@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% load default_filters %}
+{% load i18n %}
+{% get_current_language as lang_code %}
+{% block content %}
+  <h1>{% trans 'app_name' %}</h1>
+  <p>{% trans 'app_short_description' %}</p>
+  <small>{{ languages|kv:lang_code|default:'' }}</small>
+{% endblock %}

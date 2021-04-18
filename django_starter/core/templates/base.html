@@ -1,0 +1,22 @@
+{% load i18n static %}
+{% get_current_language as lang_code %}
+<!DOCTYPE html>
+<html lang="{{ lang_code }}">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+  <title>{% trans 'app_name' %}</title>
+  <meta name="description" content="{% trans 'app_short_description' %}">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="google" content="notranslate">
+
+  <link rel="stylesheet" href="{% static 'core/css/picnic.min.css' %}">
+  <link rel="stylesheet" href="{% static 'core/css/default.css' %}">
+</head>
+<body>
+<main>
+  {% block content %}
+  {% endblock %}
+</main>
+</body>
+</html>
