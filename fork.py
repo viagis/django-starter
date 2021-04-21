@@ -111,12 +111,13 @@ if __name__ == '__main__':
     django_root = project_root.joinpath(django_project_name)
     django_project_dir = django_root.joinpath(django_project_name)
 
-    # Copy project to destination
     if project_root.is_dir():
         fatal_error(f'Project root already exists: {project_root}')
 
-    shutil.copytree(SCRIPT_DIR, project_root, ignore=shutil.ignore_patterns('.git', '.venv'), symlinks=True)
+    # Copy project to destination
+    shutil.copytree(SCRIPT_DIR, project_root, ignore=shutil.ignore_patterns('.git', '.venv', 'fork.py'), symlinks=True)
 
+    # Rename django directories
     django_root = rename_dir(project_root.joinpath('django_starter'), django_root, 'Django Root')
     django_project_dir = rename_dir(django_root.joinpath('django_starter'), django_project_dir, 'Django Project Dir')
 
@@ -140,3 +141,5 @@ if __name__ == '__main__':
     print('To setup your poetry virtual environment run:\n'
           'poetry env use ~/.pyenv/versions/3.7.3/bin/python\n'
           'poetry install --no-root')
+
+    print('Before running the server call: poetry run task build')
