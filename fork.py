@@ -42,9 +42,8 @@ def rename_dir(source_path: Path, target_path: Path, dir_title: str) -> Path:
     print(f'{f"Renaming {dir_title}:":<{TP}} -> {str(target_path.relative_to(SCRIPT_DIR.parent)):>3}')
     new_path = source_path
     if source_path.is_dir():
-        if not dry_run:
-            source_path.rename(target_path)
-            new_path = target_path
+        source_path.rename(target_path)
+        new_path = target_path
     else:
         fatal_error(f'Unable to find directory: {source_path}')
 
@@ -81,21 +80,18 @@ def replace_in_dir(dir_path: Path, subs: Iterable[ReSub]) -> List[Path]:
             if total_replacements:
                 adjusted_files.append(item)
 
-                if not dry_run:
-                    with item.open('w') as f:
-                        f.writelines(updated_lines)
+                with item.open('w') as f:
+                    f.writelines(updated_lines)
 
     return adjusted_files
 
 
 if __name__ == '__main__':
     parser = ArgumentParser(description='Transforms the starter project into a new django project with custom name.')
-    parser.add_argument('-n', '--dry-run', action='store_true')
     parser.add_argument('--name', type=str, help='Project name')
     parser.add_argument('-d', '--destination', type=Path, default=SCRIPT_DIR.parent,
                         help='Path to the destination directory the fork should be created in')
     args = parser.parse_args()
-    dry_run = args.dry_run
     destination_dir: Path = args.destination
 
     if not destination_dir.is_dir():
@@ -119,8 +115,7 @@ if __name__ == '__main__':
     if project_root.is_dir():
         fatal_error(f'Project root already exists: {project_root}')
 
-    if not dry_run:
-        shutil.copytree(SCRIPT_DIR, project_root, ignore=shutil.ignore_patterns('.git', '.venv'), symlinks=True)
+    shutil.copytree(SCRIPT_DIR, project_root, ignore=shutil.ignore_patterns('.git', '.venv'), symlinks=True)
 
     django_root = rename_dir(project_root.joinpath('django_starter'), django_root, 'Django Root')
     django_project_dir = rename_dir(django_root.joinpath('django_starter'), django_project_dir, 'Django Project Dir')
@@ -134,17 +129,13 @@ if __name__ == '__main__':
     ]))
     print(f'({len(updated_files)})')
 
-    if not dry_run:
-        run(['git', 'init', '-b', 'main'], cwd=project_root)
-
-    if not dry_run:
-        run(['git', 'add', '-A'], cwd=project_root)
-        run(['git', 'commit', '-m', '"Initial commit."'], cwd=project_root)
+    run(['git', 'init', '-b', 'main'], cwd=project_root)
+    run(['git', 'add', '-A'], cwd=project_root)
+    run(['git', 'commit', '-m', '"Initial commit."'], cwd=project_root)
 
     print('Setting project up for development')
     setup_script = project_root.joinpath('init.py')
-    if not dry_run:
-        run(['python3', str(setup_script), 'debug'], cwd=project_root)
+    run(['python3', str(setup_script), 'debug'], cwd=project_root)
 
     print('To setup your poetry virtual environment run:\n'
           'poetry env use ~/.pyenv/versions/3.7.3/bin/python\n'
