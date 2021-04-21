@@ -32,6 +32,9 @@ check = "task lint; task security-check; task deploy-check"
 makemessages = "cd django && ./manage.py makemessages -l en -l de"  # add languages as required
 compilemessages = "task django compilemessages --ignore .venv"
 build = "task compilemessages"  # Add additional tasks with '&& task'
+runserver = "task django runserver"
+migrate = "task django migrate"
+makemigrations = "task django makemigrations"
 pre_deploy = "task check; task build"
 deploy = "python django_starter/deploy.py"
 
