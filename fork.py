@@ -130,6 +130,10 @@ if __name__ == '__main__':
     ]))
     print(f'({len(updated_files)})')
 
+    # Rename Intellij .iml file
+    idea_dir = project_root.joinpath('.idea')
+    idea_dir.joinpath('django-starter.iml').rename(idea_dir.joinpath(f'{project_name}.iml'))
+
     run(['git', 'init', '-b', 'main'], cwd=project_root)
     run(['git', 'add', '-A'], cwd=project_root)
     run(['git', 'commit', '-m', '"Initial commit."'], cwd=project_root)
