@@ -10,9 +10,9 @@ import shutil
 from argparse import ArgumentParser
 from dataclasses import dataclass
 from pathlib import Path
-from subprocess import run
+from subprocess import run, DEVNULL, PIPE
 from sys import stderr
-from typing import List, Pattern, Iterable
+from typing import List, Pattern, Iterable, Optional
 
 SCRIPT_DIR = Path(__file__).absolute().parent
 IGNORED_DIRECTORY_PATTERNS = {
@@ -24,7 +24,7 @@ IGNORED_FILE_PATTERNS = {
     re.compile(r'.*\.mo$'),
     re.compile(r'\.DS_Store'),
 }
-TP = 30
+TP = 40
 
 
 @dataclass
@@ -33,13 +33,13 @@ class ReSub:
     replacement: str
 
 
-def fatal_error(message: str, exit_code: int = 1):
+def fatal_error(message: Optional[str] = None, exit_code: int = 1):
     print(message, file=stderr)
     exit(exit_code)
 
 
 def rename_dir(source_path: Path, target_path: Path, dir_title: str) -> Path:
-    print(f'{f"Renaming {dir_title}:":<{TP}} -> {str(target_path.relative_to(SCRIPT_DIR.parent)):>3}')
+    print(f'{f"Renaming {dir_title}":<{TP}}-> {str(target_path.relative_to(SCRIPT_DIR.parent)):>3}')
     new_path = source_path
     if source_path.is_dir():
         source_path.rename(target_path)
@@ -86,13 +86,21 @@ def replace_in_dir(dir_path: Path, subs: Iterable[ReSub]) -> List[Path]:
     return adjusted_files
 
 
+def run_command(args: List[str], **kwargs):
+    result = run(args, stdout=None if verbose else DEVNULL, **kwargs)
+    if result.returncode != 0:
+        fatal_error()
+
+
 if __name__ == '__main__':
     parser = ArgumentParser(description='Transforms the starter project into a new django project with custom name.')
     parser.add_argument('--name', type=str, help='Project name')
     parser.add_argument('-d', '--destination', type=Path, default=SCRIPT_DIR.parent,
                         help='Path to the destination directory the fork should be created in')
+    parser.add_argument('-v', '--verbose', action='store_true')
     args = parser.parse_args()
     destination_dir: Path = args.destination
+    verbose = args.verbose
 
     if not destination_dir.is_dir():
         fatal_error(f'Destination directory does not exist: {destination_dir}')
@@ -122,28 +130,42 @@ if __name__ == '__main__':
     django_project_dir = rename_dir(django_root.joinpath('django_starter'), django_project_dir, 'Django Project Dir')
 
     # Replace project name and directory references in files (django-starter, django_starter)
-    print(f'{"Rewriting project files":<{TP}}', end='')
+    print(f'{"Rewriting project files":<{TP}}', end='', flush=True)
     updated_files = set(replace_in_dir(project_root, [
         ReSub(re.compile('django-starter'), project_name),
         ReSub(re.compile('django_starter'), django_project_name),
         ReSub(re.compile('Django Starter'), project_name),
     ]))
-    print(f'({len(updated_files)})')
+    print(len(updated_files))
 
     # Rename Intellij .iml file
     idea_dir = project_root.joinpath('.idea')
     idea_dir.joinpath('django-starter.iml').rename(idea_dir.joinpath(f'{project_name}.iml'))
 
-    run(['git', 'init', '-b', 'main'], cwd=project_root)
-    run(['git', 'add', '-A'], cwd=project_root)
-    run(['git', 'commit', '-m', '"Initial commit."'], cwd=project_root)
+    print(f'{"Initializing Git repository":<{TP}}', end='', flush=True)
+    version_number_re = re.compile(r'([0-9]+\.[0-9]+\.?[0-9]+)')
+    result = run(['git', '--version'], cwd=project_root, stdout=PIPE)
+    if result.returncode != 0:
+        fatal_error('Unable to get git version.')
+    match = version_number_re.search(result.stdout.decode())
+    if not match:
+        fatal_error('Unable to get git version.')
 
-    print('Setting project up for development')
+    git_version = match.group(1)
+    run_command(['git', 'init'] + (['-b', 'main'] if git_version >= '2.28' else []), cwd=project_root)
+    run_command(['git', 'add', '-A'], cwd=project_root)
+    run_command(['git', 'commit', '-m', '"Initial commit."'], cwd=project_root)
+    print('OK', flush=True)
+
+    print(f'{"Setting up project for development":<{TP}}', end='', flush=True)
     setup_script = project_root.joinpath('init.py')
-    run(['python3', str(setup_script), 'debug'], cwd=project_root)
+    run_command(['python3', str(setup_script), 'debug'], cwd=project_root)
+    print('OK')
 
-    print('To setup your poetry virtual environment run:\n'
+    print()
+    print('Next setup your poetry virtual environment with:\n'
           'poetry env use ~/.pyenv/versions/3.7.3/bin/python\n'
           'poetry install --no-root')
-
-    print('Before running the server call: poetry run task build')
+    print()
+    print('Build the project before running the server with:\n'
+          'poetry run task build')
