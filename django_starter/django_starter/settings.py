@@ -13,8 +13,9 @@ from pathlib import Path
 
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.translation import gettext_lazy as _
-from django_starter.enums import Environment, EnumCaseNotFound
 from dotenv import dotenv_values
+
+from django_starter.enums import Environment, EnumCaseNotFound
 
 SETTINGS_DIR = Path(__file__).absolute().parent
 BASE_DIR = SETTINGS_DIR.parent
@@ -46,6 +47,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
+    'django.contrib.admin',
     'safedelete',
     'core.apps.CoreConfig',
 ]
@@ -100,6 +102,7 @@ WSGI_APPLICATION = 'django_starter.wsgi.application'
 CONN_MAX_AGE = 2
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+AUTH_USER_MODEL = 'core.User'
 
 DATABASES = {
     'default': {
@@ -185,6 +188,13 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
+]
+
+PASSWORD_HASHERS = [
+    'django.contrib.auth.hashers.Argon2PasswordHasher',
+    # 'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+    # 'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
+    # 'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
 ]
 
 # Internationalization

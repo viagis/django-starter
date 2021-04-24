@@ -15,6 +15,7 @@ drf-nested-routers = "^0.93.3"
 requests = "^2.25.1"
 django-enumfield = "^2.0.2"
 django-safedelete = "^1.0.0"
+argon2-cffi = "^20.1.0"
 
 [tool.poetry.dev-dependencies]
 safety = "*"

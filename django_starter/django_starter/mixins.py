@@ -7,8 +7,8 @@ from django.db.models import Model, DateTimeField
 
 
 class HistoryMixin(Model):
-    create_date = DateTimeField(auto_now_add=True, db_index=True)
-    modified_date = DateTimeField(auto_now=True, db_index=True)
+    created_on = DateTimeField(auto_now_add=True, db_index=True)
+    modified_on = DateTimeField(auto_now=True, db_index=True)
 
     class Meta:
         abstract = True
