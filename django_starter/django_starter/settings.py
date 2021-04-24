@@ -13,9 +13,8 @@ from pathlib import Path
 
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.translation import gettext_lazy as _
-from dotenv import dotenv_values
-
 from django_starter.enums import Environment, EnumCaseNotFound
+from dotenv import dotenv_values
 
 SETTINGS_DIR = Path(__file__).absolute().parent
 BASE_DIR = SETTINGS_DIR.parent
@@ -98,6 +97,8 @@ WSGI_APPLICATION = 'django_starter.wsgi.application'
 
 # https://docs.djangoproject.com/en/3.0/ref/databases/#persistent-database-connections
 CONN_MAX_AGE = 2
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 DATABASES = {
     'default': {
