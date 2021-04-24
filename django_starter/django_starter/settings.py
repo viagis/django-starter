@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
+    'safedelete',
     'core.apps.CoreConfig',
 ]
 if DEBUG:
