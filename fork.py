@@ -125,7 +125,9 @@ if __name__ == '__main__':
         fatal_error(f'Project root already exists: {project_root}')
 
     # Copy project to destination
-    shutil.copytree(SCRIPT_DIR, project_root, ignore=shutil.ignore_patterns('.git', '.venv', 'fork.py'), symlinks=True)
+    shutil.copytree(SCRIPT_DIR, project_root, ignore=shutil.ignore_patterns(
+        '.git', '.venv', 'fork.py', '*.mo'
+    ), symlinks=True)
 
     # Rename django directories
     django_root = rename_dir(project_root.joinpath('django_starter'), django_root, 'Django Root')
