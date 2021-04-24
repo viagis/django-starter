@@ -94,9 +94,10 @@ def run_command(args: List[str], **kwargs):
 
 if __name__ == '__main__':
     parser = ArgumentParser(description='Transforms the starter project into a new django project with custom name.')
-    parser.add_argument('--name', type=str, help='Project name')
+    parser.add_argument('--project', type=str, help='Project name')
+    parser.add_argument('--django-project', type=str, help='Django Project name')
     parser.add_argument('-d', '--destination', type=Path, default=SCRIPT_DIR.parent,
-                        help='Path to the destination directory the fork should be created in')
+                        help='Path to the destination directory where the fork should be created in')
     parser.add_argument('-v', '--verbose', action='store_true')
     args = parser.parse_args()
     destination_dir: Path = args.destination
@@ -105,14 +106,15 @@ if __name__ == '__main__':
     if not destination_dir.is_dir():
         fatal_error(f'Destination directory does not exist: {destination_dir}')
 
-    project_name = args.name
+    project_name = args.project
     if isinstance(project_name, str):
         project_name = project_name.strip()
 
     while not project_name:
         project_name = input('Enter project name: ').strip()
 
-    django_project_name = re.sub(r'\s|-', '_', project_name).lower()
+    django_project_name = args.django_project or project_name
+    django_project_name = re.sub(r'\s|-', '_', django_project_name).lower()
 
     # Replace directory names
     project_root = destination_dir.joinpath(project_name)
