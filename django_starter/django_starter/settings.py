@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.humanize',
     'django.contrib.admin',
     'safedelete',
+    'rest_framework',
     'core.apps.CoreConfig',
 ]
 if DEBUG:
@@ -230,6 +231,30 @@ STATIC_ROOT = BASE_DIR.joinpath('static')
 # Other Django Settings
 CSRF_COOKIE_SECURE = True
 SECURE_REFERRER_POLICY = 'no-referrer'
+
+# Django Rest Framework
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ] + ([
+        'rest_framework.renderers.BrowsableAPIRenderer'
+    ] if DEBUG else []),
+    'DEFAULT_PARSER_CLASSES': [
+        'rest_framework.parsers.JSONParser',
+        'rest_framework.parsers.FormParser',
+        'rest_framework.parsers.MultiPartParser'
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ],
+    'DEFAULT_THROTTLE_CLASSES': [
+        # TODO
+    ]
+}
 
 # Django Debug Toolbar
 INTERNAL_IPS = [
