@@ -27,8 +27,10 @@ django-stubs = "^1.8.0"
 djangorestframework-stubs = "^1.4.0"
 
 [tool.taskipy.tasks]
+djangowa = "python -Wa django_starter/manage.py"
 django = "python django_starter/manage.py"
 lint = "flake8"
+test = "task djangowa test core --noinput --timing"
 security-check = "safety check"
 deploy-check = "task django check --deploy"
 check = "task lint; task security-check; task deploy-check"
