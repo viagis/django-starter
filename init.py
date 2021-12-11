@@ -10,6 +10,7 @@ import shutil
 import string
 from argparse import ArgumentParser
 from enum import Enum
+from hashlib import sha256
 from pathlib import Path
 from random import SystemRandom
 from sys import stderr
@@ -186,17 +187,29 @@ if __name__ == '__main__':
         created = False
         for script_file in hook_dir.glob('*.sh'):
             dest_file = git_hook_dir.joinpath(script_file.name.replace(script_file.suffix, ''))
-            if not dest_file.is_file():
-                with script_file.open() as f:
-                    script_contents = f.read()
 
-                from os import environ
 
-                script_contents = f"""#!/usr/bin/env bash
+            def sha256_from_file(file_path: Path) -> str:
+                file_hash = sha256()
+                with file_path.open('rb') as f:
+                    file_hash.update(f.read())
 
-export PATH="$PATH:{environ.get('PATH')}"
+                return file_hash.hexdigest()
 
-{script_contents}"""
+
+            with script_file.open() as f:
+                script_contents = f.read()
+
+            from os import environ
+
+            script_contents = f"""#!/usr/bin/env bash
+    
+    export PATH="$PATH:{environ.get('PATH')}"
+    
+    {script_contents}"""
+
+            script_hash = sha256(script_contents.encode()).hexdigest()
+            if not dest_file.is_file() or sha256_from_file(dest_file) != script_hash:
                 with dest_file.open('w+') as f:
                     f.write(script_contents)
 
@@ -207,3 +220,4 @@ export PATH="$PATH:{environ.get('PATH')}"
                 dest_file.chmod(permissions)
 
         print('CREATED' if created else 'OK')
+
